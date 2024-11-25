@@ -1,38 +1,26 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 // SPDX-FileCopyrightText: 2023 JWP Consulting GK
 import type { ProjectDetail } from "$lib/types/workspace";
-import { dashboardUrl } from "$lib/urls/dashboard";
 
 import type { LayoutLoadEvent } from "./$types";
 
-import { goto } from "$app/navigation";
-import { currentProject } from "$lib/stores/dashboard/project";
+import { getProject } from "$lib/stores/dashboard/project";
+import { error } from "@sveltejs/kit";
+import { currentWorkspace } from "$lib/stores/dashboard/workspace";
 
 interface Data {
-    project: Promise<ProjectDetail | undefined>;
+    project: ProjectDetail;
 }
 
-export function load({ params: { projectUuid } }: LayoutLoadEvent): Data {
-    const project: Promise<ProjectDetail | undefined> = currentProject
-        .loadUuid(projectUuid)
-        .then((project) => {
-            if (!project) {
-                // If we don't have a project, we don't have anything (no
-                // workspace uuid etc), so we are back to the dashboard in that case.
-                // TODO tell the user that we have done so
-                throw new Error(
-                    `No project could be found for UUID '${projectUuid}'`,
-                );
-            }
-            return project;
-        })
-        .catch(async () => {
-            await goto(dashboardUrl);
-            return undefined;
-        });
+export async function load({
+    params: { projectUuid },
+}: LayoutLoadEvent): Promise<Data> {
+    const project: ProjectDetail | undefined = await getProject(projectUuid);
+    if (project === undefined) {
+        error(404, `No project could be found for UUID '${projectUuid}'`);
+    }
+    await currentWorkspace.loadUuid(project.workspace.uuid);
     return { project };
 }
 
 export const prerender = false;
-// TODO Maybe we can set this to true at some point and have SSR support
-export const ssr = false;

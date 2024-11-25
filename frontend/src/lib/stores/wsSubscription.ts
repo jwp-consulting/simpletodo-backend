@@ -215,11 +215,18 @@ type Reconnector = () => void;
 
 type AsyncUnsubscriber = () => Promise<void>;
 
+type SubscribeResult =
+    | { kind: "subscribed"; unsubscriber: AsyncUnsubscriber }
+    | { kind: "server" };
+
 async function subscribeToResource(
     resource: Resource,
     listener: EventListener,
     reconnect: Reconnector,
-): Promise<AsyncUnsubscriber> {
+): Promise<SubscribeResult> {
+    if (!browser) {
+        return { kind: "server" };
+    }
     let state:
         | "subscribing"
         | "subscribed"
@@ -297,7 +304,7 @@ async function subscribeToResource(
         };
         addListener(subscribedListener);
     });
-    return await established;
+    return { kind: "subscribed", unsubscriber: await established };
 }
 
 /* Subscribable WS Store
@@ -305,18 +312,24 @@ async function subscribeToResource(
  *  ┌─────┐   loadUuid  ┌─────┐ ──────────────┐
  *  │Start│────────────►│Ready│               │ subscription update:
  *  └─────┘             └─────┘ ◄─────────────┘ set(newValue)
- *                        ▲ │
- *                        │ │ loadUuid
- *                        │ │ reconnect
+ *       .---.          | ▲ │
+ *       |SSR|<---------. │ │ loadUuid
+ *       .---.  !browser  │ │ reconnect
  *                        └─┘
  *
  * This thing basically just passes on ws updates to subscribers, plus
  * one initial load
+ * Now, it also contains code to handle SSR
  */
 
 type WsStoreState<T> =
     | {
           kind: "start";
+      }
+    | {
+          kind: "ssr";
+          value: T | undefined;
+          uuid: string;
       }
     | {
           kind: "ready";
@@ -356,6 +369,9 @@ export function createWsStore<T extends HasUuid>(
             console.error("Already reset");
             return;
         }
+        if (state.kind === "ssr") {
+            return;
+        }
         console.debug("Resetting resource", resource, "uuid", state.uuid);
 
         const release = await loadMutex.obtain();
@@ -372,7 +388,9 @@ export function createWsStore<T extends HasUuid>(
         if (state.kind === "start") {
             return;
         }
-        console.debug("Stopping");
+        if (state.kind === "ssr") {
+            return;
+        }
         resetAndUnsubscribe().catch((error: unknown) =>
             console.error("Error when resetting", error),
         );
@@ -425,11 +443,15 @@ export function createWsStore<T extends HasUuid>(
 
         const release = await loadMutex.obtain();
         try {
-            const unsubscriber = await backOff(() =>
+            const result = await backOff(() =>
                 subscribeToResource({ resource, uuid }, onMessage, reconnect),
             );
+            if (result.kind === "server") {
+                console.error("Trying to reconnect in server");
+                return;
+            }
             console.debug("Reconnected to resource", resource, "uuid", uuid);
-            state = { ...state, unsubscriber };
+            state = { ...state, unsubscriber: result.unsubscriber };
         } finally {
             release();
         }
@@ -438,30 +460,39 @@ export function createWsStore<T extends HasUuid>(
     const loadUuid = async (uuid: string): Promise<T | undefined> => {
         const oldState = state;
         type Result =
-            | { kind: "newUuid"; value: T; unsubscriber: AsyncUnsubscriber }
+            | { kind: "newUuid"; value: T; unsubscriber?: AsyncUnsubscriber }
             | { kind: "noResult"; value: undefined }
             | {
                   kind: "sameUuid";
                   value: T | undefined;
-                  unsubscriber: AsyncUnsubscriber;
+                  unsubscriber?: AsyncUnsubscriber;
               };
         let result: Result | undefined = undefined;
         const release = await loadMutex.obtain();
         try {
             switch (oldState.kind) {
+                case "ssr":
                 case "ready": {
                     if (oldState.uuid === uuid) {
-                        result = {
-                            kind: "sameUuid",
-                            value: oldState.value,
-                            unsubscriber: oldState.unsubscriber,
-                        };
+                        if (oldState.kind === "ready") {
+                            result = {
+                                kind: "sameUuid",
+                                value: oldState.value,
+                                unsubscriber: oldState.unsubscriber,
+                            };
+                        } else {
+                            result = {
+                                kind: "sameUuid",
+                                value: oldState.value,
+                            };
+                        }
                     } else {
-                        await oldState.unsubscriber();
-
+                        if (oldState.kind === "ready") {
+                            await oldState.unsubscriber();
+                        }
                         const getterResult = await backOff(() => getter(uuid));
                         if (getterResult) {
-                            const unsubscriber = await backOff(() =>
+                            const subscriptionResult = await backOff(() =>
                                 subscribeToResource(
                                     { resource, uuid },
                                     onMessage,
@@ -471,7 +502,10 @@ export function createWsStore<T extends HasUuid>(
                             result = {
                                 kind: "newUuid",
                                 value: getterResult,
-                                unsubscriber,
+                                unsubscriber:
+                                    subscriptionResult.kind === "subscribed"
+                                        ? subscriptionResult.unsubscriber
+                                        : undefined,
                             };
                         } else {
                             result = {
@@ -487,7 +521,7 @@ export function createWsStore<T extends HasUuid>(
                     if (getterResult === undefined) {
                         result = { kind: "noResult", value: getterResult };
                     } else {
-                        const unsubscriber = await backOff(() =>
+                        const subscriptionResult = await backOff(() =>
                             subscribeToResource(
                                 { resource, uuid },
                                 onMessage,
@@ -497,7 +531,10 @@ export function createWsStore<T extends HasUuid>(
                         result = {
                             kind: "newUuid",
                             value: getterResult,
-                            unsubscriber,
+                            unsubscriber:
+                                subscriptionResult.kind === "subscribed"
+                                    ? subscriptionResult.unsubscriber
+                                    : undefined,
                         };
                     }
                     break;
@@ -517,13 +554,22 @@ export function createWsStore<T extends HasUuid>(
                     orPromise: () => Promise.resolve(value),
                     value,
                 });
-                state = {
-                    ...oldState,
-                    kind: "ready",
-                    uuid,
-                    unsubscriber: result.unsubscriber,
-                    value,
-                };
+                if (result.unsubscriber) {
+                    state = {
+                        ...oldState,
+                        kind: "ready",
+                        uuid,
+                        unsubscriber: result.unsubscriber,
+                        value,
+                    };
+                } else {
+                    state = {
+                        ...oldState,
+                        kind: "ssr",
+                        uuid,
+                        value,
+                    };
+                }
                 return result.value;
             }
             case "noResult": {

@@ -2,6 +2,9 @@
 <!-- SPDX-FileCopyrightText: 2024 JWP Consulting GK -->
 <script lang="ts">
     import Storefront from "../+page.svelte";
+    import type { PageData } from "./$types";
+
+    export let data: PageData;
 </script>
 
-<Storefront />
+<Storefront {data} />

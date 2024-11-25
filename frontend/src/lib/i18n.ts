@@ -4,6 +4,7 @@ import { addMessages, getLocaleFromNavigator, init } from "svelte-i18n";
 // TODO use register
 
 import en from "$messages/en";
+import { browser } from "$app/environment";
 
 const defaultLocale = "en";
 
@@ -11,7 +12,7 @@ function initializeI18n() {
     addMessages("en", en);
     const initialization = init({
         fallbackLocale: defaultLocale,
-        initialLocale: getLocaleFromNavigator(),
+        initialLocale: browser ? getLocaleFromNavigator() : "en",
     });
 
     if (!initialization) {

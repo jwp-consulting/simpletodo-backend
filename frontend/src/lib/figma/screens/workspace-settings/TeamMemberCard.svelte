@@ -7,10 +7,6 @@
     import AvatarVariant from "$lib/figma/navigation/AvatarVariant.svelte";
     import Button from "$lib/funabashi/buttons/Button.svelte";
     import CircleIcon from "$lib/funabashi/buttons/CircleIcon.svelte";
-    import {
-        currentTeamMember,
-        currentTeamMemberCan,
-    } from "$lib/stores/dashboard/teamMember";
     import { openDestructiveOverlay } from "$lib/stores/globalUi";
     import { teamMemberRoles } from "$lib/types/teamMemberRole";
     import type { EditableViewState } from "$lib/types/ui";
@@ -21,6 +17,17 @@
     } from "$lib/types/workspace";
     import { getMessageNameForRole } from "$lib/utils/i18n";
     import { openApiClient } from "$lib/repository/util";
+    import type {
+        CurrentTeamMember,
+        CurrentTeamMemberCan,
+    } from "$lib/stores/dashboard/teamMember";
+    import { getContext } from "svelte";
+
+    const currentTeamMember =
+        getContext<CurrentTeamMember>("currentTeamMember");
+    const currentTeamMemberCan = getContext<CurrentTeamMemberCan>(
+        "currentTeamMemberCan",
+    );
 
     export let teamMember: WorkspaceDetailTeamMember;
 

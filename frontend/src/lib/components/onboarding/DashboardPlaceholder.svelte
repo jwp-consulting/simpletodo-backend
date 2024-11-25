@@ -53,7 +53,6 @@
         toggleUserExpandOpen,
         userExpandOpen,
     } from "$lib/stores/dashboard/ui";
-    import { currentUser } from "$lib/stores/user";
     import type {
         Label,
         ProjectDetail,
@@ -69,6 +68,7 @@
     import Dashboard from "$routes/(platform)/dashboard/project/[projectUuid]/+page.svelte";
     import WorkspaceSelector from "$lib/figma/navigation/side-nav/WorkspaceSelector.svelte";
     import Projects from "$lib/figma/navigation/side-nav/Projects.svelte";
+    import type { CurrentUser } from "$lib/types/user";
 
     // We are cheating a bit here
     const quota: WorkspaceQuota = {
@@ -128,6 +128,7 @@
         }
     });
 
+    export let user: CurrentUser & { kind: "authenticated" };
     export let state: State;
 
     $: workspace = {
@@ -215,9 +216,7 @@
                 <Projects {workspace} />
             </div>
             <div class="min-w-0 grow">
-                {#if $currentUser}
-                    <Dashboard data={{ injectProject: project }} />
-                {/if}
+                <Dashboard data={{ user, project }} />
             </div>
         </div>
     </div>

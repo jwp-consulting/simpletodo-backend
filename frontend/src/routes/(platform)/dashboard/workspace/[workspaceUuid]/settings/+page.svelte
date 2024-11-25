@@ -8,7 +8,6 @@
     import Button from "$lib/funabashi/buttons/Button.svelte";
     import InputField from "$lib/funabashi/input-fields/InputField.svelte";
     import Anchor from "$lib/funabashi/typography/Anchor.svelte";
-    import { currentTeamMemberCan } from "$lib/stores/dashboard/teamMember";
     import type { EditableViewState } from "$lib/types/ui";
     import { uploadImage } from "$lib/utils/file";
 
@@ -16,6 +15,12 @@
 
     import { beforeNavigate } from "$app/navigation";
     import { openApiClient } from "$lib/repository/util";
+    import type { CurrentTeamMemberCan } from "$lib/stores/dashboard/teamMember";
+    import { getContext } from "svelte";
+
+    const currentTeamMemberCan = getContext<CurrentTeamMemberCan>(
+        "currentTeamMemberCan",
+    );
 
     export let data: PageData;
 

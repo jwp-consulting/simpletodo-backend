@@ -6,15 +6,19 @@
 
     import SideNavMenuCategory from "$lib/figma/buttons/SideNavMenuCategory.svelte";
     import FilterTeamMember from "$lib/figma/composites/FilterTeamMember.svelte";
-    import {
-        userExpandOpen,
-        toggleUserExpandOpen,
-    } from "$lib/stores/dashboard/ui";
+    import { toggleUserExpandOpen } from "$lib/stores/dashboard/ui";
     import { selectedTeamMember } from "$lib/stores/dashboard/teamMemberFilter";
     import { currentWorkspace } from "$lib/stores/dashboard/workspace";
-    import { currentTeamMemberCan } from "$lib/stores/dashboard/teamMember";
     import ContextMenuButton from "$lib/figma/buttons/ContextMenuButton.svelte";
     import { getSettingsUrl } from "$lib/urls";
+    import type { CurrentTeamMemberCan } from "$lib/stores/dashboard/teamMember";
+    import { getContext } from "svelte";
+    import type { Readable } from "svelte/store";
+
+    const userExpandOpen = getContext<Readable<boolean>>("userExpandOpen");
+    const currentTeamMemberCan = getContext<CurrentTeamMemberCan>(
+        "currentTeamMemberCan",
+    );
 </script>
 
 <SideNavMenuCategory

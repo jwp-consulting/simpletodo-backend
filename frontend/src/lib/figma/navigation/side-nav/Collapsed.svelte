@@ -9,7 +9,12 @@
     import SquovalIcon from "$lib/funabashi/buttons/SquovalIcon.svelte";
     import { selectProjectUuid, showFilters } from "$lib/stores/dashboard/ui";
     import { getDashboardProjectUrl } from "$lib/urls";
-    import { currentProject } from "$lib/stores/dashboard/project";
+    import { getContext } from "svelte";
+    import type { WsResource } from "$lib/types/stores";
+    import type { ProjectDetail } from "$lib/types/workspace";
+
+    const currentProject =
+        getContext<WsResource<ProjectDetail>>("currentProject");
     import { currentWorkspace } from "$lib/stores/dashboard/workspace";
 
     $: workspace = $currentWorkspace.value ?? $currentProject.value?.workspace;

@@ -4,13 +4,14 @@
     import ConnectionStatus from "$lib/components/ConnectionStatus.svelte";
     import ContextMenuContainer from "$lib/components/ContextMenuContainer.svelte";
     import HeaderDashboard from "$lib/figma/navigation/header/Dashboard.svelte";
-    import { currentUser } from "$lib/stores/user";
+    import type { LayoutData } from "./$types";
+
+    export let data: LayoutData;
+    const { user } = data;
 </script>
 
 <div class="flex grow flex-col overflow-y-auto">
-    {#if $currentUser.kind === "authenticated"}
-        <HeaderDashboard user={$currentUser} />
-    {/if}
+    <HeaderDashboard {user} />
     <slot />
 </div>
 

@@ -10,16 +10,19 @@
     import type { InputFieldValidation } from "$lib/funabashi/types";
     import Anchor from "$lib/funabashi/typography/Anchor.svelte";
     import { currentWorkspace } from "$lib/stores/dashboard/workspace";
-    import {
-        currentTeamMemberCan,
-        currentTeamMembers,
-    } from "$lib/stores/dashboard/teamMember";
+    import { currentTeamMembers } from "$lib/stores/dashboard/teamMember";
     import type { FormViewState } from "$lib/types/ui";
     import { coerceIsoDate } from "$lib/utils/date";
 
     import type { PageData } from "./$types";
     import { openApiClient } from "$lib/repository/util";
     import Loading from "$lib/components/Loading.svelte";
+    import type { CurrentTeamMemberCan } from "$lib/stores/dashboard/teamMember";
+    import { getContext } from "svelte";
+
+    const currentTeamMemberCan = getContext<CurrentTeamMemberCan>(
+        "currentTeamMemberCan",
+    );
 
     export let data: PageData;
 

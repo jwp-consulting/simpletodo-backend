@@ -146,8 +146,8 @@
             label={state.kind == "submitting"
                 ? $_("auth.confirm-password-reset.submit.submitting")
                 : state.kind === "error"
-                ? $_("auth.confirm-password-reset.submit.error")
-                : $_("auth.confirm-password-reset.submit.start")}
+                  ? $_("auth.confirm-password-reset.submit.error")
+                  : $_("auth.confirm-password-reset.submit.start")}
         />
     </div>
 </AuthScreen>

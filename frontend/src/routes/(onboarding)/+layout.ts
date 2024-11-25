@@ -9,4 +9,3 @@ export { load };
 // Perhaps something in this hierarchy can be prerendered?
 // TODO check
 export const prerender = false;
-export const ssr = false;

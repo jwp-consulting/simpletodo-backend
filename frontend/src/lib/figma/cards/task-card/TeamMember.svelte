@@ -5,13 +5,18 @@
 
     import AvatarVariant from "$lib/figma/navigation/AvatarVariant.svelte";
     import { updateTask } from "$lib/repository/workspace/task";
-    import { currentTeamMemberCan } from "$lib/stores/dashboard/teamMember";
     import { createTeamMemberAssignment } from "$lib/stores/dashboard/teamMemberAssignment";
     import { openContextMenu } from "$lib/stores/globalUi";
     import type { ContextMenuType, FormViewState } from "$lib/types/ui";
     import { getDisplayName } from "$lib/types/user";
     import type { ProjectDetailTask } from "$lib/types/workspace";
     import { cloneMutable } from "$lib/utils/type";
+    import type { CurrentTeamMemberCan } from "$lib/stores/dashboard/teamMember";
+    import { getContext } from "svelte";
+
+    const currentTeamMemberCan = getContext<CurrentTeamMemberCan>(
+        "currentTeamMemberCan",
+    );
 
     export let task: ProjectDetailTask;
 

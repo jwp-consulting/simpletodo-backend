@@ -8,23 +8,13 @@ import { unwrap } from "$lib/utils/type";
 import type { PageLoadEvent } from "./$types";
 
 interface Data {
-    tasks: Promise<readonly TaskWithSection[]>;
+    tasks: readonly TaskWithSection[];
     search: SearchInput;
 }
-export function load({ url, parent }: PageLoadEvent): Data {
+export async function load({ url, parent }: PageLoadEvent): Promise<Data> {
     const search: SearchInput = url.searchParams.get("search") ?? undefined;
-    const tasks = (async () => {
-        const data = await parent();
-        const project = await data.project;
-        if (project === undefined) {
-            throw new Error("Expected project");
-        }
-        const { sections } = project;
-        const tasks = searchTasks(
-            unwrap(sections, "Expected sections"),
-            search,
-        );
-        return tasks;
-    })();
+    const data = await parent();
+    const { sections } = data.project;
+    const tasks = searchTasks(unwrap(sections, "Expected sections"), search);
     return { tasks, search };
 }

@@ -31,15 +31,15 @@
                 checked && !disabled
                     ? "bg-primary border-primary text-foreground group-hover:bg-primary-hover"
                     : disabled
-                    ? ""
-                    : "group-hover:bg-secondary-hover group-hover:border-foreground";
+                      ? ""
+                      : "group-hover:bg-secondary-hover group-hover:border-foreground";
         } else {
             outerStyle =
                 checked && !disabled
                     ? "bg-primary border-primary text-foreground hover:bg-primary-hover"
                     : disabled
-                    ? ""
-                    : "hover:bg-secondary-hover hover:border-foreground";
+                      ? ""
+                      : "hover:bg-secondary-hover hover:border-foreground";
         }
     }
 </script>

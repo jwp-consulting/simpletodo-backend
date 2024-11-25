@@ -6,7 +6,7 @@
 
     const data = {
         section: sectionDetail,
-        userAwaitable: Promise.resolve(user1),
+        user: user1,
     };
 </script>
 

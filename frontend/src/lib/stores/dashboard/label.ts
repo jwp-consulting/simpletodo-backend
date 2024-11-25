@@ -7,19 +7,15 @@ import { searchAmong } from "$lib/stores/util";
 import type { SearchInput } from "$lib/types/base";
 import type { Label } from "$lib/types/workspace";
 import { currentProject } from "./project";
-import { currentWorkspace } from "./workspace";
 
 type CurrentWorkspaceLabels = Readable<readonly Label[] | undefined>;
 export const currentWorkspaceLabels: CurrentWorkspaceLabels = derived<
-    [typeof currentWorkspace, typeof currentProject],
+    [typeof currentProject],
     readonly Label[] | undefined
 >(
-    [currentWorkspace, currentProject],
-    ([$currentWorkspace, $currentProject], set) => {
-        set(
-            $currentWorkspace.value?.labels ??
-                $currentProject.value?.workspace.labels,
-        );
+    [currentProject],
+    ([$currentProject], set) => {
+        set($currentProject.value?.workspace.labels);
     },
     undefined,
 );

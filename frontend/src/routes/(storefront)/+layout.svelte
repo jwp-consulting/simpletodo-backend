@@ -6,11 +6,14 @@
     import Landing from "$lib/figma/navigation/header/Landing.svelte";
     import MobileMenuOverlay from "$lib/figma/overlays/MobileMenuOverlay.svelte";
     import { mobileMenuState } from "$lib/stores/globalUi";
-    import { currentUser } from "$lib/stores/user";
+    import type { PageData } from "./$types";
+
+    export let data: PageData;
+    const { user } = data;
 </script>
 
 <div class="flex grow flex-col">
-    {#if $currentUser.kind === "authenticated"}
+    {#if user.kind === "authenticated"}
         <Continue />
     {:else}
         <Landing />
@@ -29,4 +32,4 @@
         </div>
     </div>
 </div>
-<Footer />
+<Footer {user} />

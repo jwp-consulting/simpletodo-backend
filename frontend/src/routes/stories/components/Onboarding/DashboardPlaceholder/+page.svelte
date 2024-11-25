@@ -36,6 +36,13 @@
     type Kind = State["kind"];
     let stateKind: Kind = "new-workspace";
 
+    const user = {
+        email: "asd",
+        kind: "authenticated" as const,
+        preferred_name: "asd",
+        profile_picture: null,
+    };
+
     // https://stackoverflow.com/questions/56981452/typescript-union-type-to-single-mapped-type/56981568#56981568
     type StateSelector<
         K extends State["kind"],
@@ -113,5 +120,5 @@
         </label>
     </div>
 
-    <DashboardPlaceholder {state} />
+    <DashboardPlaceholder {user} {state} />
 </div>

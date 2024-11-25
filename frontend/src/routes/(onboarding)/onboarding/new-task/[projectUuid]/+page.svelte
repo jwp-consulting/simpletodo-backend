@@ -103,6 +103,7 @@
 
     <DashboardPlaceholder
         slot="content"
+        {user}
         state={{
             kind: "new-task",
             workspace,

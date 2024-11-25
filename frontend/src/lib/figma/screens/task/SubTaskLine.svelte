@@ -21,7 +21,7 @@
     export let onInteract: (() => void) | undefined = undefined;
     export let onEnter: (() => void) | undefined = undefined;
 
-    const id = self.crypto.randomUUID();
+    const id = crypto.randomUUID();
 </script>
 
 <div class="flex w-full flex-row items-center justify-between gap-2 px-2 py-1">

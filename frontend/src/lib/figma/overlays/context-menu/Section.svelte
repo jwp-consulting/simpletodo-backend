@@ -17,7 +17,6 @@
         toggleSectionOpen,
         sectionClosed,
     } from "$lib/stores/dashboard/ui";
-    import { currentTeamMemberCan } from "$lib/stores/dashboard/teamMember";
     import {
         openConstructiveOverlay,
         openDestructiveOverlay,
@@ -27,6 +26,12 @@
         ProjectDetailSection,
     } from "$lib/types/workspace";
     import { openApiClient } from "$lib/repository/util";
+    import type { CurrentTeamMemberCan } from "$lib/stores/dashboard/teamMember";
+    import { getContext } from "svelte";
+
+    const currentTeamMemberCan = getContext<CurrentTeamMemberCan>(
+        "currentTeamMemberCan",
+    );
 
     export let project: ProjectDetail;
     export let section: ProjectDetailSection;

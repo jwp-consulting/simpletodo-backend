@@ -6,7 +6,7 @@
     import Onboarding from "$lib/components/Onboarding.svelte";
     import InputField from "$lib/funabashi/input-fields/InputField.svelte";
     import { goto } from "$lib/navigation";
-    import { currentUser, updateUserProfile } from "$lib/stores/user";
+    import { updateUserProfile } from "$lib/stores/user";
     import { aboutYouUrl, newWorkspaceUrl } from "$lib/urls/onboarding";
 
     import type { PageData } from "./$types";
@@ -15,12 +15,11 @@
     import { getLogInWithNextUrl } from "$lib/urls/user";
 
     export let data: PageData;
+    const { user } = data;
 
     let state: FormViewState = { kind: "start" };
     let preferredName: PageData["user"]["preferred_name"] =
-        $currentUser.kind === "authenticated"
-            ? $currentUser.preferred_name
-            : data.user.preferred_name;
+        user.preferred_name;
     let preferredNameValidation: InputFieldValidation | undefined = undefined;
 
     async function submit() {

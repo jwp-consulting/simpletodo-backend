@@ -3,7 +3,10 @@
 <script lang="ts">
     import Collapsed from "$lib/figma/navigation/side-nav/Collapsed.svelte";
     import Full from "$lib/figma/navigation/side-nav/Full.svelte";
-    import { sideNavOpen } from "$lib/stores/dashboard/ui";
+    import { getContext } from "svelte";
+    import type { Readable } from "svelte/motion";
+
+    const sideNavOpen = getContext<Readable<boolean>>("sideNavOpen");
 </script>
 
 {#if $sideNavOpen}

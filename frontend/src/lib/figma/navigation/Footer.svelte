@@ -7,8 +7,10 @@
     import Button from "$lib/funabashi/buttons/Button.svelte";
     import Anchor from "$lib/funabashi/typography/Anchor.svelte";
     import { signUpUrl } from "$lib/urls/user";
-    import { currentUser } from "$lib/stores/user";
     import { backToHomeUrl } from "$lib/urls";
+    import type { CurrentUser } from "$lib/types/user";
+
+    export let user: CurrentUser;
 
     const buildData = {
         buildDate: __BUILD_DATE__,
@@ -31,7 +33,7 @@
                 </div>
                 <p>{$_("navigation.footer.logo.heading")}</p>
             </a>
-            {#if $currentUser.kind !== "authenticated"}
+            {#if user.kind !== "authenticated"}
                 <Button
                     action={{ kind: "a", href: signUpUrl }}
                     style={{ kind: "primary" }}

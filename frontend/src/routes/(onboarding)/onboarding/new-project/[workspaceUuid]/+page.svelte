@@ -18,7 +18,7 @@
 
     export let data: PageData;
 
-    const { workspace, project } = data;
+    const { user, workspace, project } = data;
 
     let state: FormViewState = { kind: "start" };
 
@@ -136,6 +136,7 @@
 
     <DashboardPlaceholder
         slot="content"
+        {user}
         state={{
             kind: "new-project",
             workspace,

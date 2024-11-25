@@ -7,7 +7,6 @@
     import ContextMenuButton from "$lib/figma/buttons/ContextMenuButton.svelte";
     import Layout from "$lib/figma/overlays/context-menu/Layout.svelte";
     import { goto } from "$lib/navigation";
-    import { currentTeamMemberCan } from "$lib/stores/dashboard/teamMember";
     import {
         openConstructiveOverlay,
         openDestructiveOverlay,
@@ -18,6 +17,12 @@
     } from "$lib/types/workspace";
     import { getArchiveUrl } from "$lib/urls";
     import { openApiClient } from "$lib/repository/util";
+    import type { CurrentTeamMemberCan } from "$lib/stores/dashboard/teamMember";
+    import { getContext } from "svelte";
+
+    const currentTeamMemberCan = getContext<CurrentTeamMemberCan>(
+        "currentTeamMemberCan",
+    );
 
     export let workspace: WorkspaceDetail;
     export let project: WorkspaceDetailProject;

@@ -9,7 +9,12 @@ const config: KnipConfig = {
         "src/lib-stories/storybook.ts",
         "src/routes/stories/**/*.{stories.ts,ts,svelte}",
     ],
-    entry: ["postcss.config.cjs", "bin/check-i18n", "src/bin/check-i18n.ts"],
+    entry: [
+        "postcss.config.cjs",
+        "bin/check-i18n",
+        "src/bin/check-i18n.ts",
+        "src/hooks.server.ts",
+    ],
     /* Extensions looked up by running the following in fish:
      * for file in (find src -type f)
      * path extension "$file"

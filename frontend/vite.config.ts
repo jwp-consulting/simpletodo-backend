@@ -179,31 +179,31 @@ function getProxyConfig(
     }
     return {
         "/media": {
-            // TODO consider adding a VITE_PROXY_MEDIA_ENDPOINT env var
+            // TODO consider adding a VITE_MEDIA_REWRITE_TO env var
             // some point later
-            target: getFromEnv(env, "VITE_PROXY_API_ENDPOINT"),
+            target: getFromEnv(env, "VITE_API_ENDPOINT_REWRITE_TO"),
         },
         "/ws": {
-            target: getFromEnv(env, "VITE_PROXY_WS_ENDPOINT"),
+            target: getFromEnv(env, "VITE_WS_ENDPOINT_REWRITE_TO"),
             changeOrigin: true,
             ws: true,
             rewrite: (path: string) => path.replace(/^\/ws/, ""),
         },
         "/api": {
-            target: getFromEnv(env, "VITE_PROXY_API_ENDPOINT"),
+            target: getFromEnv(env, "VITE_API_ENDPOINT_REWRITE_TO"),
             changeOrigin: true,
             rewrite: (path: string) => path.replace(/^\/api/, ""),
         },
         "/admin": {
-            target: getFromEnv(env, "VITE_PROXY_API_ENDPOINT"),
+            target: getFromEnv(env, "VITE_API_ENDPOINT_REWRITE_TO"),
             changeOrigin: true,
         },
         "/static/django": {
-            target: getFromEnv(env, "VITE_PROXY_API_ENDPOINT"),
+            target: getFromEnv(env, "VITE_API_ENDPOINT_REWRITE_TO"),
             changeOrigin: true,
         },
         "/premail": {
-            target: getFromEnv(env, "VITE_PROXY_API_ENDPOINT"),
+            target: getFromEnv(env, "VITE_API_ENDPOINT_REWRITE_TO"),
             changeOrigin: true,
         },
     };
@@ -264,6 +264,9 @@ const config: UserConfigExport = defineConfig(async ({ mode }: ConfigEnv) => {
             ),
             __API_ENDPOINT__: JSON.stringify(
                 getFromEnv(env, "VITE_API_ENDPOINT"),
+            ),
+            __API_ENDPOINT_REWRITE_TO__: JSON.stringify(
+                getFromEnv(env, "VITE_API_ENDPOINT_REWRITE_TO"),
             ),
         },
     } satisfies UserConfig;

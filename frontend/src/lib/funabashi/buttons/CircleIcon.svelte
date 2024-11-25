@@ -23,7 +23,7 @@
 
     export let action: ButtonAction & { kind: "a" | "button" };
 
-    $: disabled = action.kind === "a" ? false : action.disabled ?? false;
+    $: disabled = action.kind === "a" ? false : (action.disabled ?? false);
 
     $: iconMapped = {
         ellipsis: DotsHorizontal,

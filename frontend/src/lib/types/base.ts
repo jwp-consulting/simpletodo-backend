@@ -33,11 +33,11 @@ type RecursiveKeyOfHandleValue<TValue, Text extends string> =
     TValue extends object[]
         ? Text
         : // If the value is an object...
-        TValue extends object
-        ? // Then...
-          // 1. Return the current property name as a string
-          | Text
-              // 2. Return any nested property text concatenated to this text
-              | `${Text}${RecursiveKeyOfInner<TValue>}`
-        : // Else, only return the current text as a string
-          Text;
+          TValue extends object
+          ? // Then...
+            // 1. Return the current property name as a string
+            | Text
+                // 2. Return any nested property text concatenated to this text
+                | `${Text}${RecursiveKeyOfInner<TValue>}`
+          : // Else, only return the current text as a string
+            Text;

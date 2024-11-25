@@ -8,7 +8,6 @@
     import SideNavMenuCategory from "$lib/figma/buttons/SideNavMenuCategory.svelte";
     import SelectProject from "$lib/figma/navigation/side-nav/SelectProject.svelte";
     import Anchor from "$lib/funabashi/typography/Anchor.svelte";
-    import { currentTeamMemberCan } from "$lib/stores/dashboard/teamMember";
     import {
         projectExpandOpen,
         toggleProjectExpandOpen,
@@ -16,6 +15,12 @@
     import { openConstructiveOverlay } from "$lib/stores/globalUi";
     import type { ProjectDetailWorkspace } from "$lib/types/workspace";
     import { getArchiveUrl } from "$lib/urls";
+    import type { CurrentTeamMemberCan } from "$lib/stores/dashboard/teamMember";
+    import { getContext } from "svelte";
+
+    const currentTeamMemberCan = getContext<CurrentTeamMemberCan>(
+        "currentTeamMemberCan",
+    );
 
     export let workspace: ProjectDetailWorkspace;
 

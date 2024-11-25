@@ -5,7 +5,6 @@
 // onboarding/task/[taskUuid]/new-label/
 import { error } from "@sveltejs/kit";
 
-import { getProject } from "$lib/repository/workspace/project";
 import type {
     ProjectDetailWorkspace,
     ProjectDetail,
@@ -15,6 +14,7 @@ import type {
 
 import type { PageLoadEvent } from "./$types";
 import { openApiClient } from "$lib/repository/util";
+import { currentProject } from "$lib/stores/dashboard/project";
 
 interface returnType {
     task: TaskDetail;
@@ -39,7 +39,7 @@ export async function load({
             project: { uuid: projectUuid },
         },
     } = task;
-    const project = await getProject(projectUuid);
+    const project = await currentProject.loadUuid(projectUuid);
     if (!project) {
         throw new Error("Expected project");
     }

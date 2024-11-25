@@ -15,7 +15,7 @@
     export let onSelect: () => void;
     export let onDeselect: () => void;
 
-    const id = self.crypto.randomUUID();
+    const id = crypto.randomUUID();
 </script>
 
 <div

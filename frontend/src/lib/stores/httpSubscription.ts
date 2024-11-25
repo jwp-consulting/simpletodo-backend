@@ -11,23 +11,17 @@ import { backOff } from "exponential-backoff";
 
 // TODO This could be RepoGetter, except that RepoGetter takes a uuid
 type HttpStore<T> = Readable<T | undefined> & {
-    load: () => Promise<T | undefined>;
+    load: () => Promise<T>;
     reset: () => void;
 };
 
 /*
  * Similar to createWsStore, but has to manually refetch
  */
-export function createHttpStore<T>(
-    getter: () => Promise<T | undefined>,
-): HttpStore<T> {
+export function createHttpStore<T>(getter: () => Promise<T>): HttpStore<T> {
     let value: T | undefined = undefined;
     const { set, subscribe } = writable<T | undefined>(undefined);
-    const load = async (): Promise<T | undefined> => {
-        if (value !== undefined) {
-            console.debug(`Skipping loading this resource`);
-            return value;
-        }
+    const load = async (): Promise<T> => {
         value = await backOff(() => getter());
         set(value);
         return value;

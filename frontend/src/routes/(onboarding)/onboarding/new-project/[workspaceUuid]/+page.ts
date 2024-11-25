@@ -2,11 +2,11 @@
 // SPDX-FileCopyrightText: 2023 JWP Consulting GK
 import { error } from "@sveltejs/kit";
 
-import { getWorkspace } from "$lib/repository/workspace/workspace";
-import { getProject } from "$lib/repository/workspace/project";
 import type { WorkspaceDetail, ProjectDetail } from "$lib/types/workspace";
 
 import type { PageLoadEvent } from "./$types";
+import { currentProject } from "$lib/stores/dashboard/project";
+import { currentWorkspace } from "$lib/stores/dashboard/workspace";
 
 export async function load({
     params: { workspaceUuid },
@@ -14,11 +14,13 @@ export async function load({
     workspace: WorkspaceDetail;
     project?: ProjectDetail;
 }> {
-    const workspace = await getWorkspace(workspaceUuid);
+    const workspace = await currentWorkspace.loadUuid(workspaceUuid);
     if (!workspace) {
         error(404, `No workspace could be found for UUID '${workspaceUuid}'`);
     }
     const projectUuid = workspace.projects.at(0)?.uuid;
-    const project = projectUuid ? await getProject(projectUuid) : undefined;
+    const project = projectUuid
+        ? await currentProject.loadUuid(projectUuid)
+        : undefined;
     return { workspace, project };
 }

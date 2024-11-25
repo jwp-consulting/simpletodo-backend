@@ -7,6 +7,10 @@
     import { page } from "$app/stores";
     import Landing from "$lib/figma/navigation/header/Landing.svelte";
     import Footer from "$lib/figma/navigation/Footer.svelte";
+    import type { LayoutData } from "./$types";
+
+    export let data: LayoutData;
+    const { user } = data;
 </script>
 
 <svelte:head>
@@ -67,4 +71,4 @@
         {/if}
     </main>
 </div>
-<Footer />
+<Footer {user} />

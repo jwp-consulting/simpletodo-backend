@@ -13,12 +13,11 @@
 import { derived } from "svelte/store";
 import type { Readable } from "svelte/store";
 
-import { can, type Resource, type Verb } from "$lib/rules/workspace";
 import type { WorkspaceDetailTeamMember } from "$lib/types/workspace";
 
-import { currentUser } from "../user";
 import { currentProject } from "./project";
 import { currentWorkspace } from "./workspace";
+import type { Resource, Verb } from "$lib/rules/workspace";
 
 export type CurrentTeamMembers = Readable<
     readonly WorkspaceDetailTeamMember[] | undefined
@@ -38,69 +37,10 @@ export const currentTeamMembers: CurrentTeamMembers = derived<
     undefined,
 );
 
-type CurrentTeamMember = Readable<WorkspaceDetailTeamMember | undefined>;
-
-/**
- * Find current team member belonging to logged in user
- */
-export const currentTeamMember: CurrentTeamMember = derived<
-    [typeof currentUser, typeof currentWorkspace, typeof currentProject],
+export type CurrentTeamMember = Readable<
     WorkspaceDetailTeamMember | undefined
->(
-    [currentUser, currentWorkspace, currentProject],
-    ([$user, $currentWorkspace, $currentProject], set) => {
-        if ($user.kind !== "authenticated") {
-            set(undefined);
-            return;
-        }
-        const teamMembers =
-            $currentWorkspace.value?.team_members ??
-            $currentProject.value?.workspace.team_members;
-        if (teamMembers === undefined) {
-            set(undefined);
-            return;
-        }
-        const wsUser = teamMembers.find(
-            (wsUser) => wsUser.user.email === $user.email,
-        );
-        if (wsUser === undefined) {
-            throw new Error("Couldn't find currentTeamMember");
-        }
-        set(wsUser);
-    },
-    undefined,
-);
-
-type CurrentTeamMemberCan = Readable<
-    (verb: Verb, resource: Resource) => boolean
 >;
 
-/**
- * A store that returns a function that allows permission checking for the
- * currently active, logged in user's team member.
- */
-export const currentTeamMemberCan: CurrentTeamMemberCan = derived<
-    [CurrentTeamMember, typeof currentWorkspace, typeof currentProject],
+export type CurrentTeamMemberCan = Readable<
     (verb: Verb, resource: Resource) => boolean
->(
-    [currentTeamMember, currentWorkspace, currentProject],
-    ([$currentTeamMember, $currentWorkspace, $currentProject], set) => {
-        if ($currentTeamMember === undefined) {
-            console.warn("teamMember was undefined");
-            set(() => false);
-            return;
-        }
-        const quota =
-            $currentWorkspace.value?.quota ??
-            $currentProject.value?.workspace.quota;
-        if (quota === undefined) {
-            console.warn("no quota found");
-            set(() => false);
-            return;
-        }
-        const fn = (verb: Verb, resource: Resource) =>
-            can(verb, resource, $currentTeamMember, quota);
-        set(fn);
-    },
-    () => false,
-);
+>;

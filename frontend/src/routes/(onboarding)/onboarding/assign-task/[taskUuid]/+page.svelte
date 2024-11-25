@@ -12,7 +12,7 @@
 
     export let data: PageData;
 
-    const { task, assignee, project, section, workspace, label } = data;
+    const { user, task, assignee, project, section, workspace, label } = data;
 
     const taskTitle = task.title;
 </script>
@@ -58,6 +58,7 @@
 
     <DashboardPlaceholder
         slot="content"
+        {user}
         state={{
             kind: "assign-task",
             task,

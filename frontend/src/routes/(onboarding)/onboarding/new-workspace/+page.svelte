@@ -8,7 +8,6 @@
     import InputField from "$lib/funabashi/input-fields/InputField.svelte";
     import Anchor from "$lib/funabashi/typography/Anchor.svelte";
     import { goto } from "$lib/navigation";
-    import { currentUser } from "$lib/stores/user";
     import { getNewProjectUrl, newWorkspaceUrl } from "$lib/urls/onboarding";
 
     import type { PageData } from "./$types";
@@ -18,7 +17,7 @@
     import { getLogInWithNextUrl } from "$lib/urls/user";
 
     export let data: PageData;
-    const { workspace } = data;
+    const { user, workspace } = data;
 
     let state: FormViewState = { kind: "start" };
     let workspaceTitle: string | undefined = undefined;
@@ -26,10 +25,7 @@
 
     $: disabled = workspaceTitle === undefined || state.kind === "submitting";
 
-    $: who =
-        $currentUser.kind === "authenticated"
-            ? $currentUser.preferred_name
-            : data.user.preferred_name;
+    $: who = user.preferred_name;
 
     async function submit() {
         if (!workspaceTitle) {
@@ -116,6 +112,7 @@
     </svelte:fragment>
     <DashboardPlaceholder
         slot="content"
+        {user}
         state={{
             kind: "new-workspace",
             workspace,

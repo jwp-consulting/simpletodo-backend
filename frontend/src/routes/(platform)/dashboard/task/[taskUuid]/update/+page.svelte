@@ -52,8 +52,8 @@
     let subTaskAssignment: SubTaskAssignment | undefined = undefined;
     let subTaskAssignmentValidation: string | undefined = undefined;
 
-    onMount(async () => {
-        const t = await task;
+    onMount(() => {
+        const t = task;
         title = t.title;
         description = t.description;
         dueDate = t.due_date && coerceIsoDate(t.due_date);
@@ -162,91 +162,83 @@
 </script>
 
 <svelte:head>
-    {#await task}
-        <title>{$_("task.update-task-title-loading")}</title>
-    {:then task}
-        <title
-            >{$_("task.update-task-title", {
-                values: { title: task.title },
-            })}</title
-        >
-    {/await}
+    <title
+        >{$_("task.update-task-title", {
+            values: { title: task.title },
+        })}</title
+    >
 </svelte:head>
 
-{#await task}
-    <Loading />
-{:then task}
-    <Layout>
-        <TopBar slot="top-bar" section={task.section}>
-            <Breadcrumbs
-                slot="breadcrumbs"
-                crumbs={[
-                    {
-                        label: task.section.project.title,
-                        href: getDashboardProjectUrl(task.section.project),
-                    },
-                    {
-                        label: task.section.title,
-                        href: getDashboardSectionUrl(task.section),
-                    },
-                    // We could add a better task name here, or even
-                    // extract the whole thing as a layout for any task/[taskUuid] route
-                    {
-                        label: $number(task.number),
-                        href: getTaskUrl(task),
-                    },
-                ]}
+<Layout>
+    <TopBar slot="top-bar" section={task.section}>
+        <Breadcrumbs
+            slot="breadcrumbs"
+            crumbs={[
+                {
+                    label: task.section.project.title,
+                    href: getDashboardProjectUrl(task.section.project),
+                },
+                {
+                    label: task.section.title,
+                    href: getDashboardSectionUrl(task.section),
+                },
+                // We could add a better task name here, or even
+                // extract the whole thing as a layout for any task/[taskUuid] route
+                {
+                    label: $number(task.number),
+                    href: getTaskUrl(task),
+                },
+            ]}
+        />
+        <svelte:fragment slot="buttons">
+            <Button
+                grow={false}
+                action={{
+                    kind: "submit",
+                    form: "task-form",
+                    disabled: !canUpdate,
+                }}
+                color="blue"
+                size="medium"
+                style={{ kind: "primary" }}
+                label={$_("task-screen.update.update")}
             />
-            <svelte:fragment slot="buttons">
-                <Button
-                    grow={false}
-                    action={{
-                        kind: "submit",
-                        form: "task-form",
-                        disabled: !canUpdate,
-                    }}
-                    color="blue"
-                    size="medium"
-                    style={{ kind: "primary" }}
-                    label={$_("task-screen.update.update")}
-                />
-                <Button
-                    grow={false}
-                    action={{
-                        kind: "button",
-                        action: () => action(task, true),
-                        disabled: !canUpdate,
-                    }}
-                    color="blue"
-                    size="medium"
-                    style={{ kind: "primary" }}
-                    label={$_("task-screen.update.update-continue-editing")}
-                />
-            </svelte:fragment>
-        </TopBar>
-        <svelte:fragment slot="content">
-            {#if state.kind === "error"}
-                <p class="text-error">{state.message}</p>
-            {/if}
-            {#if teamMemberAssignment && labelAssignment && subTaskAssignment}
-                <Form
-                    action={action.bind(null, task, false)}
-                    {teamMemberAssignment}
-                    {teamMemberAssignmentValidation}
-                    {labelAssignment}
-                    {labelAssignmentValidation}
-                    {subTaskAssignment}
-                    {subTaskAssignmentValidation}
-                    bind:title
-                    {titleValidation}
-                    bind:dueDate
-                    {dueDateValidation}
-                    bind:description
-                    {descriptionValidation}
-                />
-            {:else}
-                <Loading />
-            {/if}
+            <Button
+                grow={false}
+                action={{
+                    kind: "button",
+                    action: () => action(task, true),
+                    disabled: !canUpdate,
+                }}
+                color="blue"
+                size="medium"
+                style={{ kind: "primary" }}
+                label={$_("task-screen.update.update-continue-editing")}
+            />
         </svelte:fragment>
-    </Layout>
-{/await}
+    </TopBar>
+    <svelte:fragment slot="content">
+        {#if state.kind === "error"}
+            <p class="text-error">{state.message}</p>
+        {/if}
+        {#if teamMemberAssignment && labelAssignment && subTaskAssignment}
+            <Form
+                action={action.bind(null, task, false)}
+                {teamMemberAssignment}
+                {teamMemberAssignmentValidation}
+                {labelAssignment}
+                {labelAssignmentValidation}
+                {subTaskAssignment}
+                {subTaskAssignmentValidation}
+                bind:title
+                {titleValidation}
+                bind:dueDate
+                {dueDateValidation}
+                bind:description
+                {descriptionValidation}
+            />
+        {:else}
+            <Loading />
+        {/if}
+    </svelte:fragment>
+</Layout>

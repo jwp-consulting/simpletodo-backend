@@ -1,6 +1,7 @@
 <!-- SPDX-License-Identifier: AGPL-3.0-or-later -->
 <!-- SPDX-FileCopyrightText: 2023-2024 JWP Consulting GK -->
 <script lang="ts">
+    import { browser } from "$app/environment";
     import Avatar from "$lib/figma/navigation/AvatarMarble.svelte";
     import type {
         AvatarStateSize,
@@ -38,7 +39,7 @@
             alt={name}
             class="h-full w-full overflow-x-auto rounded-full object-cover object-center"
         />
-    {:else if name}
+    {:else if name && browser}
         <!-- TODO workaround since name is not reactive inside Avatar -->
         {#key name}
             <!-- TODO Avatar needs accessible label -->

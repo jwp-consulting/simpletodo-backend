@@ -14,9 +14,12 @@
     import Responsive from "./assets/responsive.png?enhanced";
     import SubTask from "./assets/sub-task.png?enhanced";
     import TaskMenu from "./assets/task-menu.png?enhanced";
-    import { currentUser } from "$lib/stores/user";
     import { signUpUrl } from "$lib/urls/user";
     import { dashboardUrl } from "$lib/urls/dashboard";
+    import type { PageData } from "./$types";
+
+    export let data: PageData;
+    const { user } = data;
 </script>
 
 <svelte:head>
@@ -37,7 +40,7 @@
                     {$_("index.hero.text")}
                 </p>
             </header>
-            {#if $currentUser.kind === "authenticated"}
+            {#if user.kind === "authenticated"}
                 <Button
                     style={{ kind: "primary" }}
                     color="blue"

@@ -8,12 +8,17 @@
     import LabelPill from "$lib/figma/cards/task-card/LabelPill.svelte";
     import { updateTask } from "$lib/repository/workspace/task";
     import { createLabelAssignment } from "$lib/stores/dashboard/labelAssignment";
-    import { currentTeamMemberCan } from "$lib/stores/dashboard/teamMember";
     import { openContextMenu } from "$lib/stores/globalUi";
     import type { LabelAssignment } from "$lib/types/stores";
     import type { ContextMenuType, FormViewState } from "$lib/types/ui";
     import type { ProjectDetailTask } from "$lib/types/workspace";
     import { cloneMutable } from "$lib/utils/type";
+    import { getContext } from "svelte";
+    import type { CurrentTeamMemberCan } from "$lib/stores/dashboard/teamMember";
+
+    const currentTeamMemberCan = getContext<CurrentTeamMemberCan>(
+        "currentTeamMemberCan",
+    );
 
     export let task: ProjectDetailTask;
 

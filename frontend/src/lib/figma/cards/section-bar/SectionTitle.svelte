@@ -8,7 +8,6 @@
     import Button from "$lib/funabashi/buttons/Button.svelte";
     import SquovalIcon from "$lib/funabashi/buttons/SquovalIcon.svelte";
     import { toggleSectionOpen } from "$lib/stores/dashboard/ui";
-    import { currentTeamMemberCan } from "$lib/stores/dashboard/teamMember";
     import { openContextMenu } from "$lib/stores/globalUi";
     import type { ContextMenuType } from "$lib/types/ui";
     import type {
@@ -16,6 +15,12 @@
         ProjectDetailSection,
     } from "$lib/types/workspace";
     import { getNewTaskUrl } from "$lib/urls";
+    import type { CurrentTeamMemberCan } from "$lib/stores/dashboard/teamMember";
+    import { getContext } from "svelte";
+
+    const currentTeamMemberCan = getContext<CurrentTeamMemberCan>(
+        "currentTeamMemberCan",
+    );
 
     export let project: ProjectDetail;
     export let section: ProjectDetailSection;

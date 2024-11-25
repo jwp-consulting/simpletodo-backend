@@ -132,8 +132,8 @@
             picture.kind === "keep"
                 ? user.profile_picture
                 : picture.kind === "clear"
-                ? null
-                : picture.src,
+                  ? null
+                  : picture.src,
     };
 
     $: canRemoveProfilePicture =

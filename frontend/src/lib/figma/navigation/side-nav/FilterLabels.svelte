@@ -13,10 +13,15 @@
         toggleLabelDropdownClosedNavOpen,
     } from "$lib/stores/dashboard/ui";
     import { selectedLabels } from "$lib/stores/dashboard/labelFilter";
-    import { currentTeamMemberCan } from "$lib/stores/dashboard/teamMember";
     import type { Label } from "$lib/types/workspace";
 
     import CreateOrUpdateLabel from "./filter-labels/CreateOrUpdateLabel.svelte";
+    import type { CurrentTeamMemberCan } from "$lib/stores/dashboard/teamMember";
+    import { getContext } from "svelte";
+
+    const currentTeamMemberCan = getContext<CurrentTeamMemberCan>(
+        "currentTeamMemberCan",
+    );
 
     // Still exporting this one for better testability in storybook
     // TODO or perhaps we can refactor the form to a new component?

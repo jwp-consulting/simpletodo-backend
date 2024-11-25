@@ -6,9 +6,20 @@
 
     import Button from "$lib/funabashi/buttons/Button.svelte";
     import InputField from "$lib/funabashi/input-fields/InputField.svelte";
-    import { currentProject } from "$lib/stores/dashboard/project";
     import type { ProjectDetailSection } from "$lib/types/workspace";
     import { getProjectSearchUrl } from "$lib/urls/dashboard";
+    import type { LayoutData } from "./$types";
+    import { getContext } from "svelte";
+    import type { WsResource } from "$lib/types/stores";
+    import type { ProjectDetail } from "$lib/types/workspace";
+
+    const currentProject =
+        getContext<WsResource<ProjectDetail>>("currentProject");
+    export let data: LayoutData;
+
+    currentProject
+        .loadUuid(data.project.uuid)
+        .catch((e: unknown) => console.error(e));
 
     $: project = $currentProject.value;
     let searchInput: string | undefined = undefined;

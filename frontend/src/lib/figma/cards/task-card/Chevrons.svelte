@@ -5,7 +5,6 @@
     import { _ } from "svelte-i18n";
 
     import CircleIcon from "$lib/funabashi/buttons/CircleIcon.svelte";
-    import { currentTeamMemberCan } from "$lib/stores/dashboard/teamMember";
     import { moveTask, canMoveTask } from "$lib/repository/workspace/task";
     import type {
         ProjectDetailSection,
@@ -15,6 +14,12 @@
     import { getDashboardSectionUrl } from "$lib/urls";
     import { goto } from "$lib/navigation";
     import { getLogInWithNextUrl } from "$lib/urls/user";
+    import type { CurrentTeamMemberCan } from "$lib/stores/dashboard/teamMember";
+    import { getContext } from "svelte";
+
+    const currentTeamMemberCan = getContext<CurrentTeamMemberCan>(
+        "currentTeamMemberCan",
+    );
 
     export let task: ProjectDetailTask;
     export let section: ProjectDetailSection;

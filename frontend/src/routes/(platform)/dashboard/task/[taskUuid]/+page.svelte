@@ -3,7 +3,6 @@
 <script lang="ts">
     import { _, number } from "svelte-i18n";
 
-    import Loading from "$lib/components/Loading.svelte";
     import Breadcrumbs from "$lib/figma/screens/task/Breadcrumbs.svelte";
     import Fields from "$lib/figma/screens/task/Fields.svelte";
     import Layout from "$lib/figma/screens/task/Layout.svelte";
@@ -16,8 +15,6 @@
     import TopBar from "$lib/figma/screens/task/TopBar.svelte";
     import Button from "$lib/funabashi/buttons/Button.svelte";
     import SquovalIcon from "$lib/funabashi/buttons/SquovalIcon.svelte";
-    import { currentTask } from "$lib/stores/dashboard/task";
-    import { currentTeamMemberCan } from "$lib/stores/dashboard/teamMember";
     import { openContextMenu } from "$lib/stores/globalUi";
     import {
         getDashboardSectionUrl,
@@ -30,10 +27,20 @@
     import type { PageData } from "./$types";
 
     import { goto } from "$app/navigation";
+    import type { CurrentTeamMemberCan } from "$lib/stores/dashboard/teamMember";
+    import { getContext } from "svelte";
+    import type { TaskDetail } from "$lib/types/workspace";
+    import type { WsResource } from "$lib/types/stores";
+
+    const currentTeamMemberCan = getContext<CurrentTeamMemberCan>(
+        "currentTeamMemberCan",
+    );
 
     export let data: PageData;
 
-    $: task = $currentTask.orPromise(data.task);
+    const currentTask = getContext<WsResource<TaskDetail>>("currentTask");
+
+    $: task = $currentTask.or(data.task);
 
     let contextMenuRef: HTMLElement;
 
@@ -41,98 +48,89 @@
         if (!$currentTeamMemberCan("update", "task")) {
             return;
         }
-        await goto(getTaskEditUrl(await task));
+        await goto(getTaskEditUrl(task));
     }
 </script>
 
-{#await task}
-    <Loading />
-{:then task}
-    <Layout>
-        <TopBar slot="top-bar" section={task.section}>
-            <Breadcrumbs
-                slot="breadcrumbs"
-                crumbs={[
-                    {
-                        label: task.section.project.title,
-                        href: getDashboardProjectUrl(task.section.project),
-                    },
-                    {
-                        label: task.section.title,
-                        href: getDashboardSectionUrl(task.section),
-                    },
-                    {
-                        label: $number(task.number),
-                        href: getTaskUrl(task),
-                    },
-                ]}
-            />
-            <svelte:fragment slot="buttons">
-                {#if $currentTeamMemberCan("update", "task")}
-                    <Button
-                        grow={false}
-                        color="blue"
-                        size="medium"
-                        style={{ kind: "primary" }}
-                        label={$_("task-screen.edit")}
-                        action={{ kind: "a", href: getTaskEditUrl(task) }}
-                    />
-                {/if}
-                <div bind:this={contextMenuRef}>
-                    <SquovalIcon
-                        ariaLabel={$_("task-screen.open-context-menu")}
-                        icon="dotsVertical"
-                        state="active"
-                        action={{
-                            kind: "button",
-                            action: openContextMenu.bind(
-                                null,
-                                {
-                                    kind: "task",
-                                    task,
-                                    location: "task",
-                                },
-                                contextMenuRef,
-                            ),
-                        }}
-                    />
-                </div>
-            </svelte:fragment>
-        </TopBar>
-        <svelte:fragment slot="content">
-            <Fields>
-                <TaskTitle
-                    slot="title"
-                    title={task.title}
-                    readonly
-                    {onInteract}
+<Layout>
+    <TopBar slot="top-bar" section={task.section}>
+        <Breadcrumbs
+            slot="breadcrumbs"
+            crumbs={[
+                {
+                    label: task.section.project.title,
+                    href: getDashboardProjectUrl(task.section.project),
+                },
+                {
+                    label: task.section.title,
+                    href: getDashboardSectionUrl(task.section),
+                },
+                {
+                    label: $number(task.number),
+                    href: getTaskUrl(task),
+                },
+            ]}
+        />
+        <svelte:fragment slot="buttons">
+            {#if $currentTeamMemberCan("update", "task")}
+                <Button
+                    grow={false}
+                    color="blue"
+                    size="medium"
+                    style={{ kind: "primary" }}
+                    label={$_("task-screen.edit")}
+                    action={{ kind: "a", href: getTaskEditUrl(task) }}
                 />
-                <TaskUser
-                    slot="assignee"
-                    teamMember={task.assignee}
-                    {onInteract}
-                    readonly
+            {/if}
+            <div bind:this={contextMenuRef}>
+                <SquovalIcon
+                    ariaLabel={$_("task-screen.open-context-menu")}
+                    icon="dotsVertical"
+                    state="active"
+                    action={{
+                        kind: "button",
+                        action: openContextMenu.bind(
+                            null,
+                            {
+                                kind: "task",
+                                task,
+                                location: "task",
+                            },
+                            contextMenuRef,
+                        ),
+                    }}
                 />
-                <TaskLabel
-                    slot="labels"
-                    labels={task.labels}
-                    {onInteract}
-                    readonly
-                />
-                <TaskDueDate
-                    slot="due-date"
-                    dueDate={task.due_date && coerceIsoDate(task.due_date)}
-                    readonly
-                    {onInteract}
-                />
-                <TaskDescription
-                    slot="description"
-                    readonly
-                    description={task.description}
-                    {onInteract}
-                />
-            </Fields>
-            <ReadSubTasks subTasks={task.sub_tasks} {onInteract} />
+            </div>
         </svelte:fragment>
-    </Layout>
-{/await}
+    </TopBar>
+    <svelte:fragment slot="content">
+        <Fields>
+            <TaskTitle slot="title" title={task.title} readonly {onInteract} />
+            <TaskUser
+                slot="assignee"
+                teamMember={task.assignee}
+                {onInteract}
+                readonly
+            />
+            <TaskLabel
+                slot="labels"
+                labels={task.labels}
+                {onInteract}
+                readonly
+            />
+            <TaskDueDate
+                slot="due-date"
+                dueDate={task.due_date && coerceIsoDate(task.due_date)}
+                readonly
+                {onInteract}
+            />
+            <TaskDescription
+                slot="description"
+                readonly
+                description={task.description}
+                {onInteract}
+            />
+        </Fields>
+        <ReadSubTasks subTasks={task.sub_tasks} {onInteract} />
+    </svelte:fragment>
+</Layout>

@@ -6,8 +6,11 @@
     import { _ } from "svelte-i18n";
 
     import CircleIcon from "$lib/funabashi/buttons/CircleIcon.svelte";
-    import { currentProject } from "$lib/stores/dashboard/project";
-    import { currentTeamMemberCan } from "$lib/stores/dashboard/teamMember";
+    import type { WsResource } from "$lib/types/stores";
+    import type { ProjectDetail } from "$lib/types/workspace";
+
+    const currentProject =
+        getContext<WsResource<ProjectDetail>>("currentProject");
     import { openContextMenu } from "$lib/stores/globalUi";
     import type {
         WorkspaceDetail,
@@ -15,6 +18,12 @@
     } from "$lib/types/workspace";
     import { getDashboardProjectUrl } from "$lib/urls";
     import { selectProjectUuid } from "$lib/stores/dashboard/ui";
+    import type { CurrentTeamMemberCan } from "$lib/stores/dashboard/teamMember";
+    import { getContext } from "svelte";
+
+    const currentTeamMemberCan = getContext<CurrentTeamMemberCan>(
+        "currentTeamMemberCan",
+    );
 
     $: currentProjectUuid = $currentProject.value?.uuid;
 

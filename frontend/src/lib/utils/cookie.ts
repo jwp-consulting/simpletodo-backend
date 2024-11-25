@@ -1,6 +1,12 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
+
+import { browser } from "$app/environment";
+
 // SPDX-FileCopyrightText: 2023 JWP Consulting GK
 export function getCookie(name: string): string | undefined {
+    if (!browser) {
+        return undefined;
+    }
     // TODO document.cookie can never be falsey!
     // https://www.w3.org/TR/DOM-Level-2-HTML/html.html#ID-8747038
     // So we can just get rid of these 3 lines

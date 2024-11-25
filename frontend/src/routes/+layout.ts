@@ -6,9 +6,12 @@ import "$lib/i18n";
 
 import { overrideClient } from "$lib/repository/util";
 import type { LayoutLoadEvent } from "./$types";
+import { currentUser } from "$lib/stores/user";
 
-export function load({ fetch }: LayoutLoadEvent) {
+export async function load({ fetch }: LayoutLoadEvent) {
     overrideClient(fetch);
+    const user = await currentUser.load();
+    return { user };
 }
 
 export const prerender = true;

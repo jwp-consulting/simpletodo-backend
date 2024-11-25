@@ -17,7 +17,6 @@
     import ContextMenuButton from "$lib/figma/buttons/ContextMenuButton.svelte";
     import Layout from "$lib/figma/overlays/context-menu/Layout.svelte";
     import { goto } from "$lib/navigation";
-    import { currentTeamMemberCan } from "$lib/stores/dashboard/teamMember";
     import { openDestructiveOverlay } from "$lib/stores/globalUi";
     import { canMoveTask, moveTask } from "$lib/repository/workspace/task";
     import type { ContextMenuType } from "$lib/types/ui";
@@ -28,6 +27,12 @@
     } from "$lib/urls";
     import { copyToClipboard } from "$lib/utils/clipboard";
     import { openApiClient } from "$lib/repository/util";
+    import type { CurrentTeamMemberCan } from "$lib/stores/dashboard/teamMember";
+    import { getContext } from "svelte";
+
+    const currentTeamMemberCan = getContext<CurrentTeamMemberCan>(
+        "currentTeamMemberCan",
+    );
 
     export let kind: ContextMenuType & { kind: "task" };
 

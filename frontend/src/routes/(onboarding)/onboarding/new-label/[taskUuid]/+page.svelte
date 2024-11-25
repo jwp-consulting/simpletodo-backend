@@ -18,7 +18,7 @@
 
     export let data: PageData;
 
-    const { workspace, project, section, task } = data;
+    const { user, workspace, project, section, task } = data;
 
     const taskTitle = task.title;
     let labelTitle: string | undefined = undefined;
@@ -107,6 +107,7 @@
 
     <DashboardPlaceholder
         slot="content"
+        {user}
         state={{
             kind: "new-label",
             workspace,

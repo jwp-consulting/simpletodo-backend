@@ -11,10 +11,10 @@ const adapter =
               strict: true,
           })
         : process.env.PROJECTIFY_FRONTEND_ADAPTER === "node"
-        ? adapterNode({
-              envPrefix: "SVELTE_KIT_",
-          })
-        : undefined;
+          ? adapterNode({
+                envPrefix: "SVELTE_KIT_",
+            })
+          : undefined;
 
 /** @type {import('@sveltejs/kit').Config} */
 const config = {
