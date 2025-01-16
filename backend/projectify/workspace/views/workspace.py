@@ -24,6 +24,7 @@ from rest_framework.status import (
 from projectify.lib.error_schema import DeriveSchema
 from projectify.lib.schema import extend_schema
 from projectify.lib.types import AuthenticatedHttpRequest
+from projectify.lib.views import platform_view
 from projectify.workspace.selectors.project import (
     project_find_by_workspace_uuid,
 )
@@ -46,6 +47,7 @@ from ..services.workspace import workspace_create, workspace_update
 
 
 # HTML
+@platform_view
 def workspace_list_view(request: AuthenticatedHttpRequest) -> HttpResponse:
     """Show all workspaces."""
     workspaces = workspace_find_for_user(who=request.user)
@@ -53,6 +55,7 @@ def workspace_list_view(request: AuthenticatedHttpRequest) -> HttpResponse:
     return render(request, "workspace/workspace_list.html", context)
 
 
+@platform_view
 def workspace_view(
     request: AuthenticatedHttpRequest, workspace_uuid: UUID
 ) -> HttpResponse:

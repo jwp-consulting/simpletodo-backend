@@ -449,3 +449,60 @@ and make the template for the form a bit more maintainable. This is the way.
 ## 2025-01-11
 
 I've now added a checkbox that lets you delete an existing sub task
+
+# 2025-01-12
+
+I realize that modifying forms can be done server-side as well. Here's the
+use case: While adding or updating a task, I'd like to add a sub task.
+Perhaps I've already entered a few sub tasks when editing an existing task.
+Or I am adding a new task and I want to add my first sub task row.
+
+The solution so far was the following: Since Projectify had a JavaScript
+frontend, I could just manage the amount of sub tasks I want to add in the
+frontend state. With Svelte, you'd use stores for this. The same applies to
+ordering both new or existing sub tasks.
+
+If I want to do this without a JavasScript frontend, I need to find other means
+of managing the state of a task without having to store an intermediate
+state of a task somewhere in the backend or database.
+
+The solution is to submit a draft form to the server and let it know in the
+POST request that this is a draft, not a final *save* request. A form can
+have several *submit* buttons, not only one. If each submit button has a
+different `name=` attribute, you can let the backend know which button was
+pressed in the browser.
+
+Let's say one of these buttons has the name `add-new-sub-task`. The POST
+request will then let the backend know that this button has been pressed. The
+backend then knows that this isn't a request to update a task based on the form
+data. Instead, it will render a new form using all the task draft information,
+with a new sub tasks row added at the end.
+
+# 2025-01-15
+
+Yesterday, I found a solution to make adding new sub task fields work. The
+idea is to increase the total formset count by manually updating the POST
+data. This is the relevant code:
+
+```python
+def view(request: HttpRequest) -> HttpResponse:
+    post = request.POST.copy()
+    sub_task_count_raw: str = post.get("form-" + TOTAL_FORM_COUNT, "0")
+    try:
+        sub_task_count = int(sub_task_count_raw)
+    except ValueError as e:
+        logger.error(
+            "Unexpected error when getting total form count", exc_info=e
+        )
+        sub_task_count = 0
+    post["form-TOTAL_FORMS"] = str(sub_task_count + 1)
+    logger.info("Adding sub task")
+    form = TaskUpdateForm(data=post, workspace=workspace)
+    formset = TaskUpdateSubTaskForms(data=post)
+    context = {"form": form, "task": task, "formset": formset}
+    return render(request, "workspace/task_update.html", context)
+```
+
+Furthermore, I've decided to not implement sub task reordering. I question
+the utility of sub task reordering in general, so I want to hold off on that
+feature for now.

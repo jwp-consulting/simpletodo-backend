@@ -3,10 +3,12 @@
 # SPDX-FileCopyrightText: 2023-2024 JWP Consulting GK
 """Task CRUD views."""
 
-from typing import Any, Literal, Union
+import logging
+from typing import Any, Literal, Optional, Union
 from uuid import UUID
 
 from django import forms
+from django.forms.formsets import TOTAL_FORM_COUNT
 from django.http import HttpResponse
 from django.http.response import Http404
 from django.shortcuts import redirect, render
@@ -53,6 +55,8 @@ from projectify.workspace.services.task import (
     task_move_in_direction,
     task_update_nested,
 )
+
+logger = logging.getLogger(__name__)
 
 
 def get_object(
@@ -114,7 +118,7 @@ class TaskUpdateSubTaskForm(forms.Form):
 
     title = forms.CharField()
     done = forms.BooleanField(required=False)
-    uuid = forms.UUIDField(widget=forms.HiddenInput)
+    uuid = forms.UUIDField(required=False, widget=forms.HiddenInput)
     delete = forms.BooleanField(
         required=False,
         label=_("Delete task"),
@@ -227,6 +231,7 @@ class TaskUpdateForm(forms.Form):
     )
     submit = forms.CharField(required=False)
     submit_stay = forms.CharField(required=False)
+    add_sub_task = forms.CharField(required=False)
 
     def __init__(self, *args: Any, workspace: Workspace, **kwargs: Any):
         """Populate available assignees."""
@@ -235,6 +240,21 @@ class TaskUpdateForm(forms.Form):
             "assignee"
         ].queryset = workspace.teammember_set.select_related("user")
         self.fields["labels"].queryset = workspace.label_set.all()
+
+
+def determine_action(
+    request: AuthenticatedHttpRequest,
+) -> Optional[Literal["get", "submit", "submit_stay", "add_sub_task"]]:
+    """Determine what update view action should be taken."""
+    if request.method == "GET":
+        return "get"
+    if "submit" in request.POST:
+        return "submit"
+    elif "submit_stay" in request.POST:
+        return "submit_stay"
+    elif "add_sub_task" in request.POST:
+        return "add_sub_task"
+    return None
 
 
 @platform_view
@@ -250,6 +270,26 @@ def task_update_view(
         raise Http404(_(f"Could not find task with uuid {task_uuid}"))
     project = task.section.project
     workspace = project.workspace
+
+    action = determine_action(request)
+
+    if action == "add_sub_task":
+        post = request.POST.copy()
+        sub_task_count_raw: str = post.get("form-" + TOTAL_FORM_COUNT, "0")
+        try:
+            sub_task_count = int(sub_task_count_raw)
+        except ValueError as e:
+            logger.error(
+                "Unexpected error when getting total form count", exc_info=e
+            )
+            sub_task_count = 0
+        post["form-TOTAL_FORMS"] = str(sub_task_count + 1)
+        logger.info("Adding sub task")
+        form = TaskUpdateForm(data=post, workspace=workspace)
+        formset = TaskUpdateSubTaskForms(data=post)
+        context = {"form": form, "task": task, "formset": formset}
+        return render(request, "workspace/task_update.html", context)
+
     task_initial = {
         "title": task.title,
         "assignee": task.assignee,
@@ -262,7 +302,7 @@ def task_update_view(
         {"title": sub_task.title, "done": sub_task.done, "uuid": sub_task.uuid}
         for sub_task in sub_tasks
     ]
-    if request.method == "GET":
+    if action == "get":
         form = TaskUpdateForm(initial=task_initial, workspace=workspace)
         formset = TaskUpdateSubTaskForms(initial=sub_tasks_initial)
         context = {"form": form, "task": task, "formset": formset}
@@ -282,6 +322,7 @@ def task_update_view(
         return render(request, "workspace/task_update.html", context)
 
     cleaned_data = form.cleaned_data
+    formset_cleaned_data = formset.cleaned_data
     update_sub_tasks: list[ValidatedDatumWithUuid] = [
         {
             "title": f["title"],
@@ -289,8 +330,17 @@ def task_update_view(
             "_order": i,
             "uuid": f["uuid"],
         }
-        for i, f in enumerate(formset.cleaned_data)
-        if not f["delete"]
+        for i, f in enumerate(formset_cleaned_data)
+        if f and f["uuid"] and not f["delete"]
+    ]
+    create_sub_tasks: list[ValidatedDatum] = [
+        {
+            "title": f["title"],
+            "done": f["done"],
+            "_order": i,
+        }
+        for i, f in enumerate(formset_cleaned_data)
+        if f and not f["uuid"] and not f["delete"]
     ]
     task_update_nested(
         who=request.user,
@@ -302,11 +352,13 @@ def task_update_view(
         labels=[],
         sub_tasks={
             "update_sub_tasks": update_sub_tasks,
-            "create_sub_tasks": [],
+            "create_sub_tasks": create_sub_tasks,
         },
     )
-    if cleaned_data["submit_stay"]:
+    if action == "submit_stay":
         n = reverse("dashboard:tasks:detail", args=(task.uuid,))
+    elif action == "submit":
+        n = reverse("dashboard:projects:detail", args=(project.uuid,))
     else:
         n = reverse("dashboard:projects:detail", args=(project.uuid,))
     return redirect(n)

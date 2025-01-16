@@ -6,6 +6,7 @@
           method="post"
           class="min-w-0 grow"
           role="presentation">
+        {{ form.errors }}
         <div class="flex h-full flex-col p-4 pt-0">
             <div class="sticky top-0 flex flex-row flex-wrap items-center justify-between gap-x-2 gap-y-4 bg-foreground pb-8 pt-4 lg:flex-nowrap">
                 <div class="flex shrink flex-row items-center gap-6">
@@ -91,18 +92,10 @@
                         <div class="flex flex-row items-center gap-4">
                             <h4 class="text-xl font-bold">Sub tasks</h4>
                         </div>
-                        <input type="hidden"
-                               name="form-TOTAL_FORMS"
-                               value="{{ formset_total }}"
-                               id="total-subtasks">
                         <div id="add-subtask" class="flex flex-row items-center gap-6">
-                            <button type="button"
-                                    hx-select-oob="#total-subtasks,#add-subtask"
-                                    hx-trigger="click"
-                                    hx-target="#subtasks"
-                                    hx-select="[data-formset]"
-                                    hx-swap="beforeend"
-                                    hx-swap="outerHTML"
+                            <button type="submit"
+                                    name="add_sub_task"
+                                    value="add_sub_task"
                                     class="w-full text-tertiary-content hover:text-tertiary-content-hover active:bg-tertiary-pressed active:text-tertiary-content-hover text-base flex min-w-max flex-row justify-center gap-2 rounded-lg px-4 py-2 font-bold disabled:bg-transparent disabled:text-disabled-content">
                                 <svg fill="none"
                                      viewBox="0 0 24 24"
@@ -118,7 +111,33 @@
                             </button>
                         </div>
                     </div>
-                    <div id="subtasks">{% include "workspace/task_update/sub_task_update.html" with formset=formset %}</div>
+                    <div id="subtasks">
+                        {{ formset.errors }}
+                        {% for form in formset %}
+                            <div data-formset
+                                 class="flex w-full flex-row items-center justify-between gap-2 px-2 py-1">
+                                <div class="flex grow flex-row items-center gap-2">
+                                    <label for="{{ form.done.id_for_label }}" class="sr-only">{{ form.done.label }}</label>
+                                    {{ form.done }}
+                                    <div class="grow">
+                                        <label for="{{ form.title.id_for_label }}" class="sr-only">{{ form.title.label }}</label>
+                                        <div class="flex flex-col items-start gap-2">
+                                            <div class="flex w-full flex-row items-center gap-2">{{ form.title }}</div>
+                                        </div>
+                                    </div>
+                                    {% if form.uuid.value %}
+                                        <input type="hidden"
+                                               name="{{ form.uuid.html_name }}"
+                                               value="{{ form.uuid.value }}">
+                                    {% endif %}
+                                    <div>
+                                        {{ form.delete }}
+                                        <label for="{{ form.delete.id_for_label }}">{{ form.delete.label }}</label>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
                 </div>
                 {{ formset.management_form }}
                 {% csrf_token %}
